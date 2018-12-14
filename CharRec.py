@@ -3,10 +3,31 @@
 import base64
 import json
 from requests import Request, Session
+from flask import Flask, render_template
+app = Flask(__name__)
 
 path = ".\\resources\\image.png"
 
-def recognize_captcha(str_image_path):
+if __name__ == '__main__':
+    app.run()
+
+@app.route("/")
+def index():
+    return "hello";
+
+@app.route("/index")
+def recognize():
+    data = json.loads(recCaptcha(path))
+    data = data["responses"]
+    # print(data)
+    res = []
+    for i in data:
+        res.append(i["fullTextAnnotation"]["text"])
+        print(i["fullTextAnnotation"]["text"])
+
+    return render_template('front.html', results=res)
+
+def recCaptcha(str_image_path):
 
         bin_captcha = open(str_image_path, 'rb').read()
         str_encode_file = base64.b64encode(bin_captcha).decode("utf-8")
@@ -45,11 +66,3 @@ def recognize_captcha(str_image_path):
         else:
             print("API error : status=" + str(obj_response.status_code))
             return "error"
-
-if __name__ == '__main__':
-    data = json.loads(recognize_captcha(path))
-    data = data["responses"]
-    # print(data)
-    # 読み込み結果表示
-    for i in data:
-        print(i["fullTextAnnotation"]["text"])
